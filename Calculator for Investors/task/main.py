@@ -178,14 +178,14 @@ class CfiProgram():
 
                 sel_company, company_dict = self.print_company_list(company_name)
 
+                if sel_company > -1 and company_dict != {}:
+                    sql_query = "DELETE FROM 'financial' WHERE ticker=?;"
+                    self.curs.execute(sql_query, (company_dict[sel_company][0],))
 
-                sql_query = "DELETE FROM 'financial' WHERE ticker=?;"
-                self.curs.execute(sql_query, (company_dict[sel_company][0],))
-
-                sql_query = "DELETE FROM 'companies' WHERE ticker=?;"
-                self.curs.execute(sql_query, (company_dict[sel_company][0],))
-                self.sqlconn.commit()
-                print("Company deleted successfully!")
+                    sql_query = "DELETE FROM 'companies' WHERE ticker=?;"
+                    self.curs.execute(sql_query, (company_dict[sel_company][0],))
+                    self.sqlconn.commit()
+                    print("Company deleted successfully!")
 
 
     def show_comp_list(self):
@@ -200,7 +200,7 @@ class CfiProgram():
                 print(row[0], row[1], row[2])
 
     def __init__(self):
-        with sqlite3.connect(f"C:\\Users\\KoliaS-PC\\{sql_file}") as sqlite_conn:
+        with sqlite3.connect(f"C:\\Users\\KoliaS-PC\\PycharmProjects\\Calculator for Investors\\Calculator for Investors\\task\\{sql_file}") as sqlite_conn:
             self.sqlconn = sqlite_conn
             sqlite_conn.row_factory = sqlite3.Row
             self.curs = sqlite_conn.cursor()
@@ -276,7 +276,7 @@ def etl_data():
     # if os.path.exists(sql_file):
     #     os.remove(sql_file)
 
-    engine = create_engine(f'sqlite:///C:\\Users\\KoliaS-PC\\{sql_file}', echo=True)
+    engine = create_engine(f'sqlite:///C:\\Users\\KoliaS-PC\\PycharmProjects\\Calculator for Investors\\Calculator for Investors\\task\\{sql_file}', echo=True)
     base.metadata.create_all(engine)
 
     with Session(engine) as session:
@@ -284,6 +284,7 @@ def etl_data():
             with open(f"{data_name}.csv") as csv_pf:
                 comp = list(csv.DictReader(csv_pf))
                 for elem in comp:
+                    print(elem)
                     if data_id == 0:
                         session.add(Companies(**elem))
                     elif data_id == 1:
