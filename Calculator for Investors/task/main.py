@@ -72,40 +72,41 @@ class CfiProgram():
         return selected_item
 
 
-    def print_company_list(self, company_name) -> dict:
-
+    def print_company_list(self, company_name):
         sql_query = f"SELECT * FROM 'companies' WHERE name like '%{company_name}%';"
         self.curs.execute(sql_query)
         self.sqlconn.commit()
 
+        # print("Q - >",self.curs.rowcount, sql_query)
         company_dict = {}
-        if self.curs.rowcount > 0:
-            for num, row in enumerate(self.curs.fetchall()):
+        result = self.curs.fetchall()
+        if result:
+            for num, row in enumerate(result):
                 company_dict[num] = [row['ticker'], row['name']]
                 print(num, row['name'])
 
             print("Enter company number:")
             sel_company = int(input())
+            return sel_company, company_dict
         else:
             print("Company not found!")
+            return -1, {}
 
-        return sel_company, company_dict
 
+    def edit_company(self, cedit=0, company_name=None):
 
-    def edit_company(self, cedit=0,company_name:str=None) -> str:
         # company exist and we should edit it
         if company_name and cedit == 0:
             # # here we should find company
             sel_company, company_dict = self.print_company_list(company_name)
 
-
-            if sel_company >= 0 and sel_company <= num:
+            if sel_company >= 0:
                 sql_query = f"SELECT * FROM 'financial' WHERE ticker = '{company_dict[sel_company][0]}';"
                 self.curs.execute(sql_query)
                 self.sqlconn.commit()
                 elem = self.curs.fetchone()
 
-                print(company_dict[sel_company][1])
+                print(company_dict[sel_company][0], company_dict[sel_company][1])
                 print("P/E =", round(elem['market_price'] / elem['net_profit'], 2))
                 print("P/S =", round(elem['market_price'] / elem['sales'], 2))
                 print("P/B =", round(elem['market_price'] / elem['assets'], 2))
@@ -118,11 +119,17 @@ class CfiProgram():
                 print("ROA =", round(elem['net_profit'] / elem['assets'], 2))
                 print("L/A =", round(elem['liabilities'] / elem['assets'], 2))
 
-
-
         else:
-            if cedit == 0:
+            if cedit == 0 or cedit == 1:
+                pass_count = 0
+                if cedit == 1:
+                    sel_company, company_dict = self.print_company_list(company_name)
+                    pass_count = 3
+
                 for key, m_elem in new_company_dict.items():
+                    if pass_count > 0:
+                        pass_count -= 1
+                        continue
                     print(m_elem[0])
                     if type(m_elem[1]) == str:
                         new_company_dict[key][1] = input()
@@ -130,28 +137,67 @@ class CfiProgram():
                         new_company_dict[key][1] = int(input())
 
 
-                sql_query = "INSERT INTO 'companies' VALUES(?, ?, ?);"
-                self.curs.execute(sql_query, (new_company_dict['ticker'][1],
-                                              new_company_dict['name'][1],
-                                              new_company_dict['industry'][1]))
+                if cedit == 0:
+                    sql_query = "INSERT INTO 'companies' VALUES(?, ?, ?);"
+                    self.curs.execute(sql_query, (new_company_dict['ticker'][1],
+                                                  new_company_dict['name'][1],
+                                                  new_company_dict['industry'][1]))
 
 
-                sql_query = "INSERT INTO 'financial' VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
-                self.curs.execute(sql_query, (new_company_dict['ticker'][1],
-                                              new_company_dict['ebitda'][1],
-                                              new_company_dict['sales'][1],
-                                              new_company_dict['net_prof'][1],
-                                              new_company_dict['market_prc'][1],
-                                              new_company_dict['net_debt'][1],
-                                              new_company_dict['assets'][1],
-                                              new_company_dict['equity'][1],
-                                              new_company_dict['cash_eq'][1],
-                                              new_company_dict['liabil'][1]
-                                              ))
+                    sql_query = "INSERT INTO 'financial' VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+                    self.curs.execute(sql_query, (new_company_dict['ticker'][1],
+                                                  new_company_dict['ebitda'][1],
+                                                  new_company_dict['sales'][1],
+                                                  new_company_dict['net_prof'][1],
+                                                  new_company_dict['market_prc'][1],
+                                                  new_company_dict['net_debt'][1],
+                                                  new_company_dict['assets'][1],
+                                                  new_company_dict['equity'][1],
+                                                  new_company_dict['cash_eq'][1],
+                                                  new_company_dict['liabil'][1]
+                                                  ))
+                    self.sqlconn.commit()
+                    print("Company created successfully!")
+                else:
+
+                    sql_query = "UPDATE 'financial' SET ebitda=?, sales=?, net_profit=?, market_price=?," \
+                                "net_debt=?, assets=?, equity=?, cash_equivalents=?, liabilities=? WHERE ticker=?;"
+                    self.curs.execute(sql_query, (new_company_dict['ebitda'][1],
+                                                  new_company_dict['sales'][1],
+                                                  new_company_dict['net_prof'][1],
+                                                  new_company_dict['market_prc'][1],
+                                                  new_company_dict['net_debt'][1],
+                                                  new_company_dict['assets'][1],
+                                                  new_company_dict['equity'][1],
+                                                  new_company_dict['cash_eq'][1],
+                                                  new_company_dict['liabil'][1],
+                                                  company_dict[sel_company][0]))
+                    self.sqlconn.commit()
+                    print("Company updated successfully!")
+            elif cedit == 100:
+
+                sel_company, company_dict = self.print_company_list(company_name)
+
+
+                sql_query = "DELETE FROM 'financial' WHERE ticker=?;"
+                self.curs.execute(sql_query, (company_dict[sel_company][0],))
+
+                sql_query = "DELETE FROM 'companies' WHERE ticker=?;"
+                self.curs.execute(sql_query, (company_dict[sel_company][0],))
                 self.sqlconn.commit()
-                print("Company created successfully!")
+                print("Company deleted successfully!")
 
 
+    def show_comp_list(self):
+        sql_query = f"SELECT * FROM 'companies' ORDER BY ticker;"
+        self.curs.execute(sql_query)
+        self.sqlconn.commit()
+
+        print("COMPANY LIST")
+        result = self.curs.fetchall()
+        if result:
+            for row in result:
+                print(row[0], row[1], row[2])
 
     def __init__(self):
         with sqlite3.connect(f"C:\\Users\\KoliaS-PC\\{sql_file}") as sqlite_conn:
@@ -160,11 +206,14 @@ class CfiProgram():
             self.curs = sqlite_conn.cursor()
 
             print("Welcome to the Investor Program!")
+            print()
 
             while True:
                 menu_key = list(menu_dict.keys())[self.menu_selected]
                 menu_list = menu_dict[menu_key]
                 print(menu_key)  # Print menu header
+
+
 
                 # print menu items
                 for number, name in enumerate(menu_list):
@@ -184,23 +233,36 @@ class CfiProgram():
                         self.menu_selected = 0
 
                 if user_input > 0 and self.menu_level == 1:
+                    if menu_key != "TOP TEN MENU":
+                        if user_input == 1:
+                            self.edit_company(0)
+                        elif user_input == 2:
+                            print("Enter company name:")
+                            u_company_name = str(input())
+                            if u_company_name:
+                                self.edit_company(0, u_company_name)
+                            # print()
+                        elif user_input == 3:
+                            print("Enter company name:")
+                            u_company_name = str(input())
+                            if u_company_name:
+                                self.edit_company(1, u_company_name)
+                        elif user_input == 4:
+                            print("Enter company name:")
+                            u_company_name = str(input())
+                            if u_company_name:
+                                self.edit_company(100, u_company_name)
+                        elif user_input == 5:
+                            self.show_comp_list()
 
-                    if user_input == 1:
-                        self.edit_company()
-                    elif user_input == 2:
-                        print("Enter company name:")
-                        u_company_name = str(input())
-                        if u_company_name:
-                            self.edit_company(u_company_name)
-                    elif user_input == 3:
-                        print("Enter company name:")
-                        u_company_name = str(input())
-                        if u_company_name:
-                            self.edit_company(u_company_name, cedit=1)
-
-                    self.menu_level = 0
-                    self.menu_selected = 0
-                    print()
+                        self.menu_level = 0
+                        self.menu_selected = 0
+                        # print()
+                    else:
+                        print("Not implemented!")
+                        self.menu_level = 0
+                        self.menu_selected = 0
+                        print()
 
                 elif user_input > -1:
                     if self.menu_level == 0:
