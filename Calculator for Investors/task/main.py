@@ -200,7 +200,7 @@ class CfiProgram():
                 print(row[0], row[1], row[2])
 
     def __init__(self):
-        with sqlite3.connect(f"C:\\Users\\KoliaS-PC\\PycharmProjects\\Calculator for Investors\\Calculator for Investors\\task\\{sql_file}") as sqlite_conn:
+        with sqlite3.connect(f"C:\\Users\\KoliaS-PC\\PycharmProjects\\Calculator for Investors\\Calculator for Investors\\task\\1{sql_file}") as sqlite_conn:
             self.sqlconn = sqlite_conn
             sqlite_conn.row_factory = sqlite3.Row
             self.curs = sqlite_conn.cursor()
@@ -221,7 +221,6 @@ class CfiProgram():
 
                 # user prompt
                 user_input = self.ask_and_check(len(menu_list))
-
                 # user prompt actions
                 if user_input == 0:
                     if self.menu_level == 0:
@@ -257,17 +256,42 @@ class CfiProgram():
 
                         self.menu_level = 0
                         self.menu_selected = 0
-                        # print()
                     else:
-                        print("Not implemented!")
+                        if user_input > 0 and user_input <= 3:
+                        # ND/EBITDA = Net debt / EBITDA
+                            if user_input == 1:
+                                sql_query = "SELECT ticker, round(financial.net_debt / financial.ebitda, 2) as ndeb FROM 'financial' ORDER BY ndeb desc LIMIT 0, 10;"
+                                print("TICKER ND/EBITDA")
+
+                            # ROE = Net profit / Equity
+                            elif user_input == 2:
+                                sql_query = "SELECT ticker, round(financial.net_profit / financial.equity, 2) as roe FROM 'financial' ORDER BY roe desc LIMIT 0, 10;"
+                                print("TICKER ROE")
+
+                            # ROA = Net profit / Assets
+                            elif user_input == 3:
+                                sql_query = "SELECT ticker, round(financial.net_profit / financial.assets, 2) as roa FROM 'financial' ORDER BY roa desc LIMIT 0, 10;"
+                                print("TICKER ROA")
+
+                            self.curs.execute(sql_query)
+                            self.sqlconn.commit()
+
+                            for row in self.curs.fetchall():
+                                print(row[0], row[1])
+
+                        menu_key = ""
                         self.menu_level = 0
                         self.menu_selected = 0
-                        print()
+                        # print()
 
                 elif user_input > -1:
                     if self.menu_level == 0:
                         self.menu_selected = user_input
                         self.menu_level = 1
+
+                elif user_input == -1:
+                    self.menu_level = 0
+                    self.menu_selected = 0
 
 
 
@@ -276,7 +300,7 @@ def etl_data():
     # if os.path.exists(sql_file):
     #     os.remove(sql_file)
 
-    engine = create_engine(f'sqlite:///C:\\Users\\KoliaS-PC\\PycharmProjects\\Calculator for Investors\\Calculator for Investors\\task\\{sql_file}', echo=True)
+    engine = create_engine(f'sqlite:///C:\\Users\\KoliaS-PC\\PycharmProjects\\Calculator for Investors\\Calculator for Investors\\task\\1{sql_file}', echo=True)
     base.metadata.create_all(engine)
 
     with Session(engine) as session:

@@ -3,30 +3,36 @@ hyperskill_project:
   ide_files: https://stepik.org/media/attachments/lesson/746910/additional_files.json
   is_template_based: false
   use_ide: true
-update_date: "Thu, 01 Jan 1970 00:00:00 UTC"
+update_date: "Mon, 06 Mar 2023 12:48:11 UTC"
 stages:
 - id: 1335
   step: 20546
-  is_completed: false
+  is_completed: true
 - id: 1336
   step: 20547
-  is_completed: false
+  is_completed: true
 - id: 1337
   step: 20548
-  is_completed: false
+  is_completed: true
 - id: 1338
   step: 20549
-  is_completed: false
+  is_completed: true
 topics:
   0:
   - title: IDE
     theory_id: 10996
   - title: Introduction to Operating systems
     theory_id: 9704
+  - title: Command line overview
+    theory_id: 8977
+  - title: Parameters and Options
+    theory_id: 9746
   - title: Files
     theory_id: 13025
   - title: File types
     theory_id: 13017
+  - title: Working with file modes and permissions
+    theory_id: 13961
   - title: Working with SQLite
     theory_id: 17163
   - title: Introduction to Python
@@ -47,10 +53,6 @@ topics:
     theory_id: 6057
   - title: Packages
     theory_id: 6384
-  - title: Command line overview
-    theory_id: 8977
-  - title: Parameters and Options
-    theory_id: 9746
   - title: Pip
     theory_id: 6230
   - title: Virtual Environment
@@ -91,14 +93,12 @@ topics:
     theory_id: 9059
   - title: Introduction to SQLite
     theory_id: 12165
-  - title: Introduction to Linux
-    theory_id: 9526
   - title: Introduction to Python shell
     theory_id: 8133
+  - title: Introduction to Linux
+    theory_id: 9526
   - title: File modes and permissions
     theory_id: 13953
-  - title: Working with file modes and permissions
-    theory_id: 13961
   - title: Files in Python
     theory_id: 8691
   - title: Basic data types
